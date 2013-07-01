@@ -14,7 +14,7 @@
 #include "pebble_fonts.h"
 
 #define MY_UUID { 0xC0, 0x76, 0xEA, 0xE9, 0x19, 0xAC, 0x41, 0x4E, 0xA6, 0xCB, 0x0F, 0x79, 0xC8, 0x12, 0xD1, 0x9C }
-PBL_APP_INFO(MY_UUID, "Binary Compact", "zanneth", 1, 0, DEFAULT_MENU_ICON, APP_INFO_WATCH_FACE);
+PBL_APP_INFO(MY_UUID, "Binary Compact", "zanneth", 1, 0, RESOURCE_ID_IMAGE_MENU_ICON, APP_INFO_WATCH_FACE);
 
 // constants
 #define COMPONENT_RECT_WIDTH    10
