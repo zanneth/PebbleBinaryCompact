@@ -21,10 +21,11 @@ PBL_APP_INFO(MY_UUID, "Binary Compact", "zanneth", 1, 0, RESOURCE_ID_IMAGE_MENU_
 #define COMPONENT_RECT_HEIGHT   16
 
 // globals
+static PblTm current_time;
 static Window window;
 static Layer hour_layer;
 static Layer minute_layer;
-static PblTm current_time;
+static Layer second_layer;
 
 // callbacks
 static void init_handler(AppContextRef app_ctx);
@@ -33,6 +34,7 @@ static void tick_handler(AppContextRef app_ctx, PebbleTickEvent *event);
 // drawing functions
 static void draw_hour_layer(Layer *layer, GContext *ctx);
 static void draw_minute_layer(Layer *layer, GContext *ctx);
+static void draw_second_layer(Layer *layer, GContext *ctx);
 static void draw_binary_rects(GContext *ctx, GRect frame, unsigned components, int32_t number);
 
 // utility
@@ -46,7 +48,7 @@ void init_handler(AppContextRef app_ctx)
 
     const GRect window_bounds = window.layer.bounds;
     const int16_t layers_width = window_bounds.size.w;
-    const int16_t layers_height = window_bounds.size.h / 2;
+    const int16_t layers_height = window_bounds.size.h / 3;
 
     // setup hour layer
     GRect hour_bounds = GRect(0, 0, layers_width, layers_height);
@@ -59,6 +61,12 @@ void init_handler(AppContextRef app_ctx)
     layer_init(&minute_layer, minute_bounds);
     layer_set_update_proc(&minute_layer, &draw_minute_layer);
     layer_add_child(&window.layer, &minute_layer);
+
+    // setup second layer
+    GRect second_bounds = GRect(0, layers_height * 2, layers_width, layers_height);
+    layer_init(&second_layer, second_bounds);
+    layer_set_update_proc(&second_layer, &draw_second_layer);
+    layer_add_child(&window.layer, &second_layer);
 
     // setup current time
     get_time(&current_time);
@@ -74,6 +82,10 @@ void tick_handler(AppContextRef app_ctx, PebbleTickEvent *event)
 
     if (event->units_changed & MINUTE_UNIT) {
         layer_mark_dirty(&minute_layer);
+    }
+
+    if (event->units_changed & SECOND_UNIT) {
+        layer_mark_dirty(&second_layer);
     }
 }
 
@@ -99,6 +111,11 @@ void draw_hour_layer(Layer *layer, GContext *ctx)
 void draw_minute_layer(Layer *layer, GContext *ctx)
 {
     draw_binary_rects(ctx, layer->frame, 6, current_time.tm_min);
+}
+
+void draw_second_layer(Layer *layer, GContext *ctx)
+{
+    draw_binary_rects(ctx, layer->frame, 6, current_time.tm_sec);
 }
 
 void draw_binary_rects(GContext *ctx, GRect frame, unsigned components, int32_t number)
@@ -136,7 +153,7 @@ void pbl_main(void *params)
         .init_handler = &init_handler,
         .tick_info = {
             .tick_handler = &tick_handler,
-            .tick_units   = MINUTE_UNIT
+            .tick_units   = SECOND_UNIT
         }
     };
 
